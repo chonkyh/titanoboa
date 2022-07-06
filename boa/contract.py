@@ -21,7 +21,8 @@ from vyper.semantics.validation.data_positions import set_data_positions
 from vyper.semantics.validation.utils import get_exact_type_from_node
 from vyper.utils import abi_method_id, cached_property
 
-from boa.env import Env
+from boa.env import Env, Interrupt
+from boa.lrudict import lrudict
 from boa.vyper.decoder_utils import decode_vyper_object
 
 
@@ -32,23 +33,6 @@ def ast_map_of(ast_node):
     for node in nodes:
         ast_map[getpos(node)] = node
     return ast_map
-
-
-class lrudict(dict):
-    def __init__(self, n, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.n = n
-
-    def __getitem__(self, k):
-        val = super().__getitem__(k)
-        del self[k]
-        super().__setitem__(k, val)
-        return val
-
-    def __setitem__(self, k, val):
-        if len(self) == self.n:
-            del self[next(iter(self))]
-        super().__setitem__(k, val)
 
 
 # create a factory for use with `create_from_factory`.
